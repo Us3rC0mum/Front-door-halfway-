@@ -1,0 +1,256 @@
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
+local HttpService = game:GetService("HttpService")
+
+if CoreGui:FindFirstChild("ProjectSpawnismoUI") then CoreGui.ProjectSpawnismoUI:Destroy() end
+
+local FOLDER_NAME = "ProjectSpawnismo"
+local FILE_NAME = FOLDER_NAME .. "/KeyAuth.json"
+
+local function SaveKeySession()
+    if writefile and isfolder and makefolder then
+        if not isfolder(FOLDER_NAME) then
+            pcall(makefolder, FOLDER_NAME)
+        end
+        local data = HttpService:JSONEncode({ timestamp = os.time() })
+        pcall(writefile, FILE_NAME, data)
+    end
+end
+
+task.spawn(function()
+    local openSound = Instance.new("Sound")
+    openSound.SoundId = "rbxassetid://97881181065416"
+    openSound.Volume = 0.52
+    pcall(function() openSound.Parent = CoreGui end)
+    if not openSound.Parent then openSound.Parent = game:GetService("SoundService") end
+    openSound:Play()
+    Debris:AddItem(openSound, 3)
+end)
+
+local function PlayClickSound()
+    task.spawn(function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://84530679244634"
+        sound.Volume = 0.3
+        pcall(function() sound.Parent = CoreGui end)
+        if not sound.Parent then sound.Parent = game:GetService("SoundService") end
+        sound:Play()
+        Debris:AddItem(sound, 1.5)
+    end)
+end
+
+local function Create(className, parent, properties, corner, stroke)
+    local obj = Instance.new(className)
+    for k, v in pairs(properties) do obj[k] = v end
+    if corner then Instance.new("UICorner", obj).CornerRadius = UDim.new(0, corner) end
+    if stroke then
+        local str = Instance.new("UIStroke", obj)
+        for k, v in pairs(stroke) do str[k] = v end
+    end
+    if parent then obj.Parent = parent end return obj
+end
+
+local function MakeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            PlayClickSound()
+            dragging, dragStart, startPos = true, input.Position, frame.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    frame.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+local function AddClickEffect(frame)
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local mousePos = input.Position
+            local framePos = frame.AbsolutePosition
+            local relativeX = mousePos.X - framePos.X
+            local relativeY = mousePos.Y - framePos.Y
+
+            local cursorEffect = Create("ImageLabel", frame, {
+                Name = "ClickCursor",
+                Size = UDim2.new(0, 32, 0, 32),
+                Position = UDim2.new(0, relativeX - 16, 0, relativeY - 16),
+                Image = "rbxassetid://82418202057512",
+                BackgroundTransparency = 1,
+                ImageTransparency = 0,
+                ZIndex = 20
+            })
+
+            task.delay(0.35, function()
+                if cursorEffect and cursorEffect.Parent then
+                    TweenService:Create(cursorEffect, TweenInfo.new(0.4), { ImageTransparency = 1 }):Play()
+                end
+            end)
+
+            Debris:AddItem(cursorEffect, 0.75)
+        end
+    end)
+end
+
+local ScreenGui = Create("ScreenGui", nil, { Name = "ProjectSpawnismoUI", ResetOnSpawn = false, DisplayOrder = 999 })
+pcall(function() ScreenGui.Parent = CoreGui end)
+if not ScreenGui.Parent then ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui") end
+
+local fontArcade = Enum.Font.Arcade
+
+local function LoadMainScript()
+    task.spawn(function()
+        local rawUrl = "https://raw.githubusercontent.com/Us3RSPWAN003/Just-a-weak-barrier/refs/heads/main/Barrier%20two%20Project%20%E2%80%A2P%23WN!"
+        local success, scriptContent = pcall(function()
+            return game:HttpGet(rawUrl)
+        end)
+        
+        if success and scriptContent then
+            local func, err = loadstring(scriptContent)
+            if func then
+                func()
+            else
+                warn("Erro ao compilar o script:", err)
+            end
+        end
+    end)
+end
+
+local function BuildScreen2(validatedKey)
+    local MainFrame2 = Create("Frame", ScreenGui, { 
+        Name = "MainFrame2", 
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Size = UDim2.new(0, 442, 0, 310), 
+        Position = UDim2.new(0.5, 0, 0.5, 0), 
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0), 
+        BorderSizePixel = 0, 
+        ClipsDescendants = true, 
+        Active = true 
+    }, 6, { Color = Color3.fromRGB(255, 255, 255), Thickness = 2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+
+    MakeDraggable(MainFrame2)
+    AddClickEffect(MainFrame2)
+
+    Create("ImageLabel", MainFrame2, { Name = "LeftCharacter", Size = UDim2.new(0, 260, 0, 310), Position = UDim2.new(0, -60, 0, -10), Image = "rbxassetid://121587368132546", ScaleType = Enum.ScaleType.Fit, BackgroundTransparency = 1, ZIndex = 1 })
+    Create("ImageLabel", MainFrame2, { Name = "RightCharacter", Size = UDim2.new(0, 230, 0, 210), Position = UDim2.new(1, -150, 1, -115), Image = "rbxassetid://119959240339935", ScaleType = Enum.ScaleType.Fit, BackgroundTransparency = 1, ZIndex = 1 })
+
+    Create("TextLabel", MainFrame2, { Size = UDim2.new(1, 0, 0, 15), Position = UDim2.new(0, 0, 0, 10), BackgroundTransparency = 1, Text = "BEM VINDO AO", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 12, Font = fontArcade, ZIndex = 10 })
+    Create("TextLabel", MainFrame2, { Size = UDim2.new(1, 0, 0, 24), Position = UDim2.new(0, 0, 0, 25), BackgroundTransparency = 1, Text = "PROJECT SPAWNISMO /└!;:.:'┚", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 18, Font = fontArcade, ZIndex = 10 })
+
+    Create("TextLabel", MainFrame2, { Size = UDim2.new(0, 260, 0, 85), Position = UDim2.new(0, 143, 0, 58), BackgroundTransparency = 1, Text = "Este script está sendo desenvolvido com dedicação para proporcionar o uso de diversas funções possíveis. Ative o projeto para liberar todos os recursos. O projeto ainda está em seu inicio, entretanto será expandido para outros Games.", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 11, Font = fontArcade, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 10 })
+    Create("TextLabel", MainFrame2, { Size = UDim2.new(0, 250, 0, 60), Position = UDim2.new(0, 143, 0, 138), BackgroundTransparency = 1, Text = "Aviso Importante | Não Skide O projeto em Desenvolvimento, Caso Faça isso o Projeto vai ser encerrado Se quiser alguma Informação entre em contato.", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 10, Font = fontArcade, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 10 })
+
+    local CloseTopButton = Create("ImageButton", MainFrame2, { Name = "CloseTopButton", Size = UDim2.new(0, 27, 0, 27), Position = UDim2.new(1, -34, 0, 8), Image = "rbxassetid://98235327129327", BackgroundTransparency = 1, ZIndex = 10 })
+    CloseTopButton.MouseButton1Click:Connect(function()
+        PlayClickSound()
+        ScreenGui:Destroy()
+    end)
+
+    local ActivateBtn = Create("TextButton", MainFrame2, { Name = "ActivateBtn", Size = UDim2.new(0, 175, 0, 28), Position = UDim2.new(0.5, -87, 0, 202), BackgroundColor3 = Color3.fromRGB(0, 0, 0), Text = "ATIVAR PROJECT", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 14, Font = fontArcade, ZIndex = 8 }, 6, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1.8, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+
+    local KeyInputFrame = Create("Frame", MainFrame2, { Name = "KeyInputFrame", Size = UDim2.new(0, 144, 0, 26), Position = UDim2.new(0.5, -87, 0, 240), BackgroundColor3 = Color3.fromRGB(0, 0, 0), ClipsDescendants = true, ZIndex = 8 }, 5, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1.8, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+    
+    Create("TextLabel", MainFrame2, { Size = UDim2.new(0, 75, 0, 10), Position = UDim2.new(0.5, -52, 0, 235), BackgroundColor3 = Color3.fromRGB(0, 0, 0), Text = "INSERT KEY", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 9, Font = fontArcade, ZIndex = 10 })
+    
+    Create("TextBox", KeyInputFrame, { 
+        Size = UDim2.new(1, -10, 1, 0), 
+        Position = UDim2.new(0, 5, 0, 0), 
+        BackgroundTransparency = 1, 
+        Text = validatedKey or "FREE_c97c178063275089c28a3a2e37e46689", 
+        TextColor3 = Color3.fromRGB(255, 255, 255), 
+        TextScaled = true, 
+        Font = fontArcade, 
+        ClearTextOnFocus = false, 
+        ZIndex = 9 
+    })
+
+    local KeyIconButtonContainer = Create("Frame", MainFrame2, { Name = "KeyIconButtonContainer", Size = UDim2.new(0, 26, 0, 26), Position = UDim2.new(0.5, 62, 0, 240), BackgroundColor3 = Color3.fromRGB(0, 0, 0), ZIndex = 8 }, 5, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1.2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+    Create("ImageButton", KeyIconButtonContainer, { Name = "KeyIconButton", Size = UDim2.new(1, -4, 1, -4), Position = UDim2.new(0, 2, 0, 2), BackgroundTransparency = 1, Image = "rbxassetid://70896385232784", ScaleType = Enum.ScaleType.Fit, ZIndex = 9 })
+
+    local CloseBottomBtn = Create("TextButton", MainFrame2, { Name = "CloseBottomBtn", Size = UDim2.new(0, 120, 0, 26), Position = UDim2.new(0.5, -60, 0, 275), BackgroundColor3 = Color3.fromRGB(0, 0, 0), Text = "Fechar Script", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 13, Font = fontArcade, ZIndex = 8 }, 4, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+
+    CloseBottomBtn.MouseButton1Click:Connect(function()
+        PlayClickSound()
+        ScreenGui:Destroy()
+    end)
+
+    ActivateBtn.MouseButton1Click:Connect(function()
+        PlayClickSound()
+        ScreenGui:Destroy()
+        LoadMainScript()
+    end)
+end
+
+local function BuildScreen1()
+    local MainFrame1 = Create("Frame", ScreenGui, { 
+        Name = "MainFrame1", 
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Size = UDim2.new(0, 442, 0, 310), 
+        Position = UDim2.new(0.5, 0, 0.5, 0), 
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0), 
+        BorderSizePixel = 0, 
+        ClipsDescendants = true, 
+        Active = true 
+    }, 6, { Color = Color3.fromRGB(255, 255, 255), Thickness = 2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+
+    MakeDraggable(MainFrame1)
+    AddClickEffect(MainFrame1)
+
+    Create("ImageLabel", MainFrame1, { Name = "LeftCharacter", Size = UDim2.new(0, 260, 0, 310), Position = UDim2.new(0, -60, 0, -10), Image = "rbxassetid://121587368132546", ScaleType = Enum.ScaleType.Fit, BackgroundTransparency = 1, ZIndex = 1 })
+    Create("ImageLabel", MainFrame1, { Name = "RightCharacter", Size = UDim2.new(0, 230, 0, 210), Position = UDim2.new(1, -150, 1, -115), Image = "rbxassetid://119959240339935", ScaleType = Enum.ScaleType.Fit, BackgroundTransparency = 1, ZIndex = 1 })
+
+    Create("TextLabel", MainFrame1, { Size = UDim2.new(1, 0, 0, 15), Position = UDim2.new(0, 0, 0, 10), BackgroundTransparency = 1, Text = "BEM VINDO AO", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 12, Font = fontArcade, ZIndex = 10 })
+    Create("TextLabel", MainFrame1, { Size = UDim2.new(1, 0, 0, 24), Position = UDim2.new(0, 0, 0, 25), BackgroundTransparency = 1, Text = "PROJECT SPAWNISMO /└!;:.:'┚", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 18, Font = fontArcade, ZIndex = 10 })
+
+    Create("TextLabel", MainFrame1, { Size = UDim2.new(0, 260, 0, 85), Position = UDim2.new(0, 143, 0, 58), BackgroundTransparency = 1, Text = "Este script está sendo desenvolvido com dedicação para proporcionar o uso de diversas funções possíveis. Ative o projeto para liberar todos os recursos. O projeto ainda está em seu inicio, entretanto será expandido para outros Games.", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 11, Font = fontArcade, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 10 })
+    Create("TextLabel", MainFrame1, { Size = UDim2.new(0, 250, 0, 60), Position = UDim2.new(0, 143, 0, 138), BackgroundTransparency = 1, Text = "Aviso Importante | Não Skide O projeto em Desenvolvimento, Caso Faça isso o Projeto vai ser encerrado Se quiser alguma Informação entre em contato.", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 10, Font = fontArcade, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 10 })
+
+    local CloseTopButton = Create("ImageButton", MainFrame1, { Name = "CloseTopButton", Size = UDim2.new(0, 27, 0, 27), Position = UDim2.new(1, -34, 0, 8), Image = "rbxassetid://98235327129327", BackgroundTransparency = 1, ZIndex = 10 })
+    CloseTopButton.MouseButton1Click:Connect(function()
+        PlayClickSound()
+        ScreenGui:Destroy()
+    end)
+
+    local KeyInputFrame = Create("Frame", MainFrame1, { Name = "KeyInputFrame", Size = UDim2.new(0, 144, 0, 26), Position = UDim2.new(0.5, -87, 0, 202), BackgroundColor3 = Color3.fromRGB(0, 0, 0), ClipsDescendants = true, ZIndex = 8 }, 5, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1.8, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+    
+    Create("TextLabel", MainFrame1, { Size = UDim2.new(0, 75, 0, 10), Position = UDim2.new(0.5, -52, 0, 197), BackgroundColor3 = Color3.fromRGB(0, 0, 0), Text = "INSERT KEY", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 9, Font = fontArcade, ZIndex = 10 })
+    local KeyBox = Create("TextBox", KeyInputFrame, { Size = UDim2.new(1, -10, 1, 0), Position = UDim2.new(0, 5, 0, 0), BackgroundTransparency = 1, Text = "--------------------", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 11, Font = fontArcade, ClearTextOnFocus = true, ZIndex = 9 })
+
+    local KeyIconButtonContainer = Create("Frame", MainFrame1, { Name = "KeyIconButtonContainer", Size = UDim2.new(0, 26, 0, 26), Position = UDim2.new(0.5, 62, 0, 202), BackgroundColor3 = Color3.fromRGB(0, 0, 0), ZIndex = 8 }, 5, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1.2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+    Create("ImageButton", KeyIconButtonContainer, { Name = "KeyIconButton", Size = UDim2.new(1, -4, 1, -4), Position = UDim2.new(0, 2, 0, 2), BackgroundTransparency = 1, Image = "rbxassetid://70896385232784", ScaleType = Enum.ScaleType.Fit, ZIndex = 9 })
+
+    local GetLinkBtn = Create("TextButton", MainFrame1, { Name = "GetLinkBtn", Size = UDim2.new(0, 85, 0, 26), Position = UDim2.new(0.5, -92, 0, 238), BackgroundColor3 = Color3.fromRGB(0, 0, 0), Text = "Obter Link", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 11, Font = fontArcade, ZIndex = 8 }, 4, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+    local VerifyKeyBtn = Create("TextButton", MainFrame1, { Name = "VerifyKeyBtn", Size = UDim2.new(0, 95, 0, 26), Position = UDim2.new(0.5, 2, 0, 238), BackgroundColor3 = Color3.fromRGB(0, 0, 0), Text = "Verificar Chave", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 11, Font = fontArcade, ZIndex = 8 }, 4, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+
+    local CloseBottomBtn = Create("TextButton", MainFrame1, { Name = "CloseBottomBtn", Size = UDim2.new(0, 120, 0, 26), Position = UDim2.new(0.5, -60, 0, 275), BackgroundColor3 = Color3.fromRGB(0, 0, 0), Text = "Fechar Script", TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 13, Font = fontArcade, ZIndex = 8 }, 4, { Color = Color3.fromRGB(255, 255, 255), Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border })
+
+    GetLinkBtn.MouseButton1Click:Connect(function()
+        PlayClickSound()
+        if setclipboard then
+            setclipboard("https://seu-link-de-key-aqui.com")
+        end
+    end)
+
+    VerifyKeyBtn.MouseButton1Click:Connect(function()
+        PlayClickSound()
+        if KeyBox.Text ~= "" and KeyBox.Text ~= "--------------------" then
+            SaveKeySession()
+            MainFrame1:Destroy()
+            BuildScreen2(KeyBox.Text)
+        end
+    end)
+
+    CloseBottomBtn.MouseButton1Click:Connect(function()
+        PlayClickSound()
+        ScreenGui:Destroy()
+    end)
+end
+
+BuildScreen1()
